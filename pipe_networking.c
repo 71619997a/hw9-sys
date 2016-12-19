@@ -26,6 +26,29 @@ int server_handshake(int *readfrom) {
     return writeto;
 }
 
+int server_handshake1(char *buf) {  // part 1 gets private FIFO thru WKP
+    printf("Creating WKP & waiting for connection\n");
+    mkfifo(WKP, 0644);
+    int readfrom = open(WKP, O_RDONLY);
+    printf("Connection made\n");
+    read(readfrom, buf, HANDSHAKE_BUFFER_SIZE);
+    printf("Received client FIFO: %s\n", buf);
+    unlink(WKP);
+    return readfrom;
+}
+
+int server_handshake2(char *buf, int readfrom) {  // part 2 works with private FIFO
+    int writeto = open(buf, O_WRONLY);
+    printf("Opened client FIFO\n");
+    write(writeto, "I ARE SERVER", HANDSHAKE_BUFFER_SIZE);
+    printf("Wrote message\n");
+    read(readfrom, buf, HANDSHAKE_BUFFER_SIZE);  // we can overwrite buf b/c not used again
+    printf("Got message from client: %s\n", buf);
+    printf("Server handshake complete\n");
+    return writeto;
+}
+    
+
 int client_handshake(int *writeto) {
     setbuf(stdout, NULL);
     char fifoname[MESSAGE_BUFFER_SIZE];

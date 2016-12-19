@@ -1,4 +1,7 @@
-all: server client
+all: server client fserver
+
+fserver: pipe_networking.c fserver.c
+	gcc -o fserver.out pipe_networking.c fserver.c
 
 server: pipe_networking.c server.c
 	gcc -o server.out pipe_networking.c server.c
